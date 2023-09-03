@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import alpaca_trade_api as tradeapi
 from trained_models import TrainedModels  # Import the TrainedModels class from trained_models.py
+from portfolio_optimization import optimize_portfolio  # Import the portfolio optimization script
 
 # Add command-line argument support
 parser = argparse.ArgumentParser(description='AI Trading Strategy')
@@ -91,15 +92,32 @@ if model_for_symbol:
             balance = float(account.cash)
 
             if action == 'buy':
-                # Define the quantity to buy based on your balance
-                # For example, you can allocate 50% of your balance to this trade
-                max_buy_quantity = int(balance * 0.5 / stock_data['Close'].iloc[-1])
+                # Get the optimized portfolio weights
+                stock_symbols = [args.symbol]  # List of symbols to optimize (only one in this case)
+                expected_returns = [...]  # List of expected returns for each asset
+                covariance_matrix = [...]  # Covariance matrix of asset returns
+                risk_tolerance = 0.1  # Adjust this based on your risk tolerance
+
+                # Call the portfolio optimization function to get weights
+                portfolio_weights = optimize_portfolio(expected_returns, covariance_matrix, risk_tolerance)
+
+                # Calculate the quantity to buy based on weights and balance
+                max_buy_quantity = int(portfolio_weights[args.symbol] * balance / stock_data['Close'].iloc[-1])
                 if max_buy_quantity > 0:
                     execute_trades(api, args.symbol, 'buy', max_buy_quantity, balance)
+
             elif action == 'sell':
-                # Define the quantity to sell based on your current position size
-                # For example, you can sell half of your current position
-                max_sell_quantity = int(balance * 0.5 / stock_data['Close'].iloc[-1])
+                # Get the optimized portfolio weights
+                stock_symbols = [args.symbol]  # List of symbols to optimize (only one in this case)
+                expected_returns = [...]  # List of expected returns for each asset
+                covariance_matrix = [...]  # Covariance matrix of asset returns
+                risk_tolerance = 0.1  # Adjust this based on your risk tolerance
+
+                # Call the portfolio optimization function to get weights
+                portfolio_weights = optimize_portfolio(expected_returns, covariance_matrix, risk_tolerance)
+
+                # Calculate the quantity to sell based on weights and balance
+                max_sell_quantity = int(portfolio_weights[args.symbol] * balance / stock_data['Close'].iloc[-1])
                 if max_sell_quantity > 0:
                     execute_trades(api, args.symbol, 'sell', max_sell_quantity, balance)
 
