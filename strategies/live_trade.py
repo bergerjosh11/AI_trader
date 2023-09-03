@@ -37,10 +37,23 @@ def execute_trades(api, symbol, action, quantity):
         )
 
 # Your AI model class should implement the get_signal method
+import joblib
+import os
+from glob import glob
+
+# Your AI model class should implement the get_signal method
 class YourTradingModel:
-    def __init__(self):
-        # Load your pre-trained machine learning model
-        self.model = RandomForestClassifier(n_estimators=100, random_state=42)  # Replace with your model
+    def __init__(self, model_folder='models/saved_models'):
+        self.model_folder = model_folder
+        self.load_most_recent_model()
+
+    def load_most_recent_model(self):
+        model_files = glob(os.path.join(self.model_folder, '*.pkl'))
+        if model_files:
+            most_recent_model_file = max(model_files, key=os.path.getctime)
+            self.model = joblib.load(most_recent_model_file)
+        else:
+            raise FileNotFoundError(f"No model files found in '{self.model_folder}'.")
 
     def get_signal(self, data):
         # Prepare the data for prediction
@@ -54,3 +67,4 @@ class YourTradingModel:
             return 'sell'
         else:
             return 'hold'
+
