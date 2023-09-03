@@ -104,4 +104,33 @@ def calculate_macd(data, short_window=12, long_window=26, signal_window=9):
     macd_data = pd.DataFrame({'MACD': macd, 'Signal Line': signal_line})
     return macd_data
 
+def calculate_quantity_to_buy(symbol, optimized_portfolio):
+    # Determine the total amount of cash available for buying stocks
+    available_cash = api.get_account().cash  # Replace with the actual method to get your account balance
+
+    # Calculate the amount of cash to allocate for each stock (equal weight)
+    num_stocks_to_buy = len([action for action in optimized_portfolio.values() if action == 'buy'])
+    if num_stocks_to_buy == 0:
+        return 0  # No stocks to buy
+    cash_per_stock = available_cash / num_stocks_to_buy
+
+    # Calculate the quantity of shares to buy for the given symbol
+    last_price = api.get_latest_trade(symbol).price  # Replace with the actual method to get the last price
+    quantity_to_buy = cash_per_stock / last_price
+
+    return int(quantity_to_buy)
+
+def calculate_quantity_to_sell(symbol, optimized_portfolio):
+    # Determine the current position size for the given symbol
+    positions = api.list_positions()  # Replace with the actual method to get your positions
+    position = next((p for p in positions if p.symbol == symbol), None)
+
+    if not position:
+        return 0  # No position for this symbol
+
+    # Calculate the quantity of shares to sell based on your strategy (e.g., sell half of the position)
+    current_quantity = int(position.qty)
+    return current_quantity // 2  # Replace with your specific selling strategy
+
+
 # Add more utility functions as needed for trading strategies
