@@ -76,6 +76,19 @@ def execute_trades(api, symbol, action, quantity, balance):
         else:
             print(f'No {symbol} position to sell or insufficient shares.')
 
+# Function to assess market risk based on volatility
+def assess_dynamic_risk(data):
+    # Calculate historical volatility
+    historical_volatility = data['Close'].pct_change().rolling(window=30).std() * np.sqrt(252)
+
+    # Determine risk level based on volatility
+    if historical_volatility.iloc[-1] > 0.2:
+        return 'high'
+    elif historical_volatility.iloc[-1] > 0.1:
+        return 'medium'
+    else:
+        return 'low'
+
 # Retrieve the trained model for the specified stock symbol
 model_for_symbol = trained_models.get_model(args.symbol)
 
@@ -86,6 +99,9 @@ if model_for_symbol:
             # Fetch historical stock data
             stock_data = data[data['Symbol'] == args.symbol].copy()
             action = moving_average_cross(stock_data)
+
+            # Assess market risk based on volatility
+            risk_level = assess_dynamic_risk(stock_data)
 
             # Get account balance (or use your real account balance)
             account = api.get_account()
