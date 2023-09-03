@@ -3,6 +3,7 @@ import pandas as pd
 import datetime
 import requests
 from bs4 import BeautifulSoup
+import os
 
 # Fetch the list of all NASDAQ-listed symbols
 nasdaq_symbols_url = "https://www.nasdaq.com/market-activity/stocks/screener?exchange=nasdaq"
@@ -19,14 +20,19 @@ start_date = end_date - datetime.timedelta(days=5*365)  # 5 years of data
 # Initialize a DataFrame to store all historical data
 all_data = pd.DataFrame()
 
-# Fetch historical stock data for each NASDAQ symbol and concatenate it
+# Create a directory to save historical data
+data_dir = 'data'
+os.makedirs(data_dir, exist_ok=True)
+
+# Fetch historical stock data for each NASDAQ symbol and save it
 for symbol in nasdaq_symbols:
-    stock_data = yf.download(symbol, start=start_date, end=end_date)
-    stock_data['Symbol'] = symbol  # Add a column for the stock symbol
-    all_data = pd.concat([all_data, stock_data])
+    try:
+        stock_data = yf.download(symbol, start=start_date, end=end_date)
+        stock_data['Symbol'] = symbol  # Add a column for the stock symbol
+        file_name = os.path.join(data_dir, f'{symbol}_historical_data.csv')
+        stock_data.to_csv(file_name)
+        print(f'Saved historical data for {symbol} to {file_name}')
+    except Exception as e:
+        print(f'Error fetching data for {symbol}: {str(e)}')
 
-# Save all data to a single CSV file
-csv_file_name = 'nasdaq_stock_data.csv'
-all_data.to_csv(csv_file_name)
-
-print(f'Saved all NASDAQ-listed historical data to {csv_file_name}')
+print(f'Saved all NASDAQ-listed historical data to {data_dir}')
