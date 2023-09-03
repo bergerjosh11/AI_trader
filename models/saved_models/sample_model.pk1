@@ -1,0 +1,42 @@
+import joblib
+import pandas as pd
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+
+# Load or generate historical price and volume data for AARP
+# This data should include features like 'Open', 'High', 'Low', 'Close', 'Volume', and 'Signal'
+# 'Signal' is the target variable indicating 'buy', 'sell', or 'hold' based on your strategy
+
+# Example: Create a DataFrame with sample historical data
+data = pd.DataFrame({
+    'Open': [100.0, 101.0, 102.0, 103.0, 104.0],
+    'High': [101.0, 102.0, 103.0, 104.0, 105.0],
+    'Low': [99.0, 100.0, 101.0, 102.0, 103.0],
+    'Close': [101.0, 102.0, 103.0, 104.0, 105.0],
+    'Volume': [100000, 110000, 120000, 130000, 140000],
+    'Signal': ['buy', 'buy', 'hold', 'sell', 'sell']
+})
+
+# Prepare the feature matrix and target variable
+X = data[['Open', 'High', 'Low', 'Close', 'Volume']]  # Features
+y = data['Signal']  # Target variable
+
+# Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Standardize features
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+
+# Create and train the model
+model = LogisticRegression(random_state=42)
+model.fit(X_train, y_train)
+
+# Evaluate the model on the test set (optional)
+
+# Save the trained model to a file
+model_filename = 'sample_model.pkl'
+joblib.dump(model, model_filename)
+print(f'Saved the sample model to {model_filename}')
